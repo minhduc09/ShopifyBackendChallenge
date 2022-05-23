@@ -10,5 +10,8 @@ namespace ShopifyBackend.Models
         [Required(ErrorMessage = "Please enter Name")]
         public string Name { get; set; }
 
+        [Display(Name = "Subscriptions")]
+        public List<Relationship>? Relationships { get; set; }
+
     }
 }

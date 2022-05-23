@@ -6,6 +6,11 @@
 
 <h1>Inventory</h1>
 
+<p>Instruction: To create an Inventory, click create new and enter an ID and a Name</p>
+<p>To add or remove location, click Select Location</p>
+<p>To check locations, Switch to Location tab on the nav bar</p>
+
+
 <p>
     <a asp-action="Create">Create New</a>
 </p>
@@ -17,6 +22,9 @@
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.LocationName)
             </th>
             <th></th>
         </tr>
@@ -31,7 +39,11 @@
                 @Html.DisplayFor(modelItem => item.Quantity)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.LocationName)
+            </td>
+            <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="EditLocation" asp-route-id="@item.Id">Select Location</a> |
                 <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
             </td>

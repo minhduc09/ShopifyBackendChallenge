@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ShopifyBackend.Models;
+using ShopifyBackend.Models.ViewModels;
 
 namespace ShopifyBackend.Controllers
 {
@@ -21,10 +22,82 @@ namespace ShopifyBackend.Controllers
         // GET: Inventories
         public async Task<IActionResult> Index()
         {
-              return _context.Inventories != null ? 
-                          View(await _context.Inventories.ToListAsync()) :
-                          Problem("Entity set 'InventoryContext.Inventories'  is null.");
+            if(_context.Inventories != null)
+            {
+                List<Location> locations = await _context.Locations.ToListAsync();
+                List <Inventory> inventories = await _context.Inventories.ToListAsync();
+                List<Relationship> relationship = await _context.Relationships.ToListAsync();
+                inventories.ForEach(i =>
+                {
+                    var r = relationship.Where(r => r.InventoryId == i.Id).FirstOrDefault();
+                    if(r != null)
+                        i.LocationName = locations.Where(l => l.Id == r.LocationId).FirstOrDefault().Name;
+                    else
+                    {
+                        i.LocationName = "Undefined";
+                    }
+                });
+                return View(inventories);
+            }
+            return Problem("Entity set 'InventoryContext.Inventories'  is null.");
+
         }
+
+        public async Task<IActionResult> EditLocation(int? ID)
+        {
+            InventoryLocationViewModel viewModel = new InventoryLocationViewModel();
+            if (ID != null)
+            {
+                viewModel.Inventory = await _context.Inventories.Where(i => i.Id == ID).FirstOrDefaultAsync();
+                viewModel.Locations = await _context.Locations.ToListAsync();
+                
+                Relationship r = await _context.Relationships.Where(r => r.InventoryId == ID).FirstOrDefaultAsync();
+                if(r != null)
+                    viewModel.Location = viewModel.Locations.Where(l => l.Id == r.LocationId).FirstOrDefault();
+                else
+                    viewModel.Location = null;
+            }
+            return View(viewModel);
+        }
+
+        public async Task<IActionResult> AddLocation(int? lID, int? iID)
+        {
+            if (lID != null && iID != null)
+            {
+                var r1 = await _context.Relationships.Where(i => i.InventoryId == iID).FirstOrDefaultAsync();
+                if(r1 != null)
+                    _context.Relationships.Remove(r1);
+
+                Relationship r = new Relationship
+                {
+                    LocationId = (int)lID,
+                    InventoryId = (int)iID,
+                };
+               
+                _context.Add(r);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("EditLocation", new { ID = iID });
+
+        }
+
+
+
+        public async Task<IActionResult> RemoveLocation(int? lID, int? iID)
+        {
+            if (lID != null && iID != null)
+            {
+                var r = await _context.Relationships.Where(i => i.InventoryId == iID ).FirstOrDefaultAsync();
+                _context.Relationships.Remove(r);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("EditLocation", new { ID = iID });
+
+        }
+
+
+
+
 
         // GET: Inventories/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -148,6 +221,9 @@ namespace ShopifyBackend.Controllers
             if (inventory != null)
             {
                 _context.Inventories.Remove(inventory);
+                var r = await _context.Relationships.FirstOrDefaultAsync(r => r.InventoryId == id);
+                if(r!=null)
+                    _context.Relationships.Remove(r);
             }
             
             await _context.SaveChangesAsync();

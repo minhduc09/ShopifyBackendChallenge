@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ShopifyBackend.Models;
 
@@ -10,9 +11,10 @@ using ShopifyBackend.Models;
 namespace ShopifyBackend.Migrations
 {
     [DbContext(typeof(InventoryContext))]
-    partial class InventoryContextModelSnapshot : ModelSnapshot
+    [Migration("20220522220729_Edit")]
+    partial class Edit
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +30,6 @@ namespace ShopifyBackend.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<string>("LocationName")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -96,7 +95,8 @@ namespace ShopifyBackend.Migrations
 
             modelBuilder.Entity("ShopifyBackend.Models.Inventory", b =>
                 {
-                    b.Navigation("Relationship");
+                    b.Navigation("Relationship")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ShopifyBackend.Models.Location", b =>
